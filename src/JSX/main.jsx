@@ -9,14 +9,6 @@ class Main extends React.Component {
           id: 0,
           primaryKey: null,
           types: [],
-          foreignKeys: [
-            {
-              foreignKeyId: null,
-              hostId: null,
-              targetTableId: null,
-              targetTypeId: null,
-            },
-          ],
         },
       ],
     };
@@ -33,50 +25,37 @@ class Main extends React.Component {
       "Byte",
     ];
 
-    const addNewTable = (data) => {
+    const addNewTable = () => {
       this.setState((prevState) => ({
         mainArray: [
           ...prevState.mainArray,
           {
-            id: this.state.mainArray[this.state.selectedTable-1].id+1,
+            id: this.state.mainArray[this.state.selectedTable - 1].id + 1,
             primaryKey: null,
             types: [],
-            foreignKeys: [
-              {
-                foreignKeyId: null,
-                hostId: null,
-                targetTableId: null,
-                targetTypeId: null,
-              },
-            ],
           },
         ],
       }));
     };
 
     const addNewType = (type, typeId, name) => {
-      this.state.mainArray[this.state.selectedTable].types.push({
-        type,
-        typeId,
-        name,
-      });
+      type == "Integer"
+        ? this.state.mainArray[this.state.selectedTable].types.push({
+            type,
+            typeId,
+            name,
+            foreignKey: {
+              foreignState: false,
+              targetTableId: null,
+              targetPrimaryKeyId: null,
+            },
+          })
+        : this.state.mainArray[this.state.selectedTable].types.push({
+            type,
+            typeId,
+            name,
+          });
       this.forceUpdate();
-
-      // this.setState((prevState) => ({
-      //   mainArray: [
-      //       ...prevState.mainArray[prevState.selectedTable],
-      //       {
-      //         types: [
-      //           ...prevState.mainArray[prevState.selectedTable].types,
-      //           {
-      //             typeId,
-      //             type,
-      //             name,
-      //           },
-      //         ],
-      //       },
-      //   ],
-      // }));
     };
 
     return (
@@ -133,7 +112,7 @@ class Main extends React.Component {
                   <input
                     className="bg-slate-500 w-[40%] outline-none"
                     type="text"
-                    placeholder={"Table" + IndexTable}
+                    placeholder={"Table " + IndexTable} /// Print zamanında tablo ismini placeholderdan çek.
                   />
                   <div className="flex flex-row justify-end space-x-3  w-[60%]">
                     <select
@@ -147,6 +126,7 @@ class Main extends React.Component {
                             this.state.selectedTable
                           ].primaryKey = null;
                         }
+                        this.forceUpdate();
                       }}
                       id="countries"
                       className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
@@ -190,18 +170,75 @@ class Main extends React.Component {
                           placeholder="name"
                         />
                         {/* FOREIGN KEY GENERATE */}
-                        {Type.type === "Integer" && this.state.mainArray[this.state.selectedTable].primaryKey !== Type.typeId ? (
-                          <select
-                            onChange={() => {}}
-                            id="countries"
-                            className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
-                          >
-                            <option value="null" selected=""></option>
-                            <option value="fk">Foreign Key</option>
-                          </select>
-                        ) : (
-                          ""
-                        )}
+                        {Type.type === "Integer" &&
+                          this.state.mainArray[IndexTable].primaryKey !=
+                            Type.typeId && (
+                            <input
+                              type={"checkbox"}
+                              onChange={(e) => {
+                                e.target.checked
+                                  ? (this.state.mainArray[IndexTable].types[
+                                      IndexType
+                                    ].foreignKey.foreignState = true)
+                                  : (this.state.mainArray[IndexTable].types[
+                                      IndexType
+                                    ].foreignKey.foreignState = false);
+                                this.forceUpdate();
+                              }}
+                            />
+                          )}
+
+                        {Type.type == "Integer" && this.state.mainArray[IndexTable].primaryKey !=
+                          Type.typeId &&
+                          this.state.mainArray[IndexTable].types[IndexType]
+                            .foreignKey.foreignState == true && (
+                            <select
+                              onChange={(e) => {
+                                e.target.value !== 'null'
+                                  ? (this.state.mainArray[IndexTable].types[
+                                      IndexType
+                                    ].foreignKey.targetTableId = e.target.value)
+                                  : (this.state.mainArray[IndexTable].types[
+                                      IndexType
+                                    ].foreignKey.targetTableId = null);
+                                this.forceUpdate();
+                              }}
+                              id="countries"
+                              className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
+                            >
+                              <option value="null" selected=""></option>
+                              {this.state.mainArray
+                                .filter((table) => table.id != IndexTable)
+                                .map((foreignTables, foreignTablesIndex) => (
+                                  <option
+                                    key={foreignTablesIndex}
+                                    value={foreignTables.id}
+                                    selected=""
+                                  >
+                                    {foreignTables.id}
+                                  </option>
+                                ))}
+                            </select>
+                          )}
+
+                        {Type.type == "Integer" && this.state.mainArray[IndexTable].types[IndexType]
+                          .foreignKey.foreignState == true &&
+                          this.state.mainArray[IndexTable].types[IndexType]
+                            .foreignKey.targetTableId !== null && (
+                            <select
+                              id="countries"
+                              className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
+                            >
+                              <option value="null" selected=""></option>
+                              <option value="null" selected="">
+                                {
+                                  this.state.mainArray[IndexTable].types[
+                                    IndexType
+                                  ].foreignKey.targetTableId
+                                }
+                              </option>
+                            </select>
+                          )}
 
                         <button
                           className=" shadow-lg px-4 py-2"

@@ -22,13 +22,7 @@ var Main = function (_React$Component) {
       mainArray: [{
         id: 0,
         primaryKey: null,
-        types: [],
-        foreignKeys: [{
-          foreignKeyId: null,
-          hostId: null,
-          targetTableId: null,
-          targetTypeId: null
-        }]
+        types: []
       }]
     };
     return _this;
@@ -42,47 +36,34 @@ var Main = function (_React$Component) {
       console.log(this.state.mainArray);
       var typesArray = ["Integer", "String", "Char", "DateTime", "Boolean", "Byte"];
 
-      var addNewTable = function addNewTable(data) {
+      var addNewTable = function addNewTable() {
         _this2.setState(function (prevState) {
           return {
             mainArray: [].concat(_toConsumableArray(prevState.mainArray), [{
               id: _this2.state.mainArray[_this2.state.selectedTable - 1].id + 1,
               primaryKey: null,
-              types: [],
-              foreignKeys: [{
-                foreignKeyId: null,
-                hostId: null,
-                targetTableId: null,
-                targetTypeId: null
-              }]
+              types: []
             }])
           };
         });
       };
 
       var addNewType = function addNewType(type, typeId, name) {
-        _this2.state.mainArray[_this2.state.selectedTable].types.push({
+        type == "Integer" ? _this2.state.mainArray[_this2.state.selectedTable].types.push({
+          type: type,
+          typeId: typeId,
+          name: name,
+          foreignKey: {
+            foreignState: false,
+            targetTableId: null,
+            targetPrimaryKeyId: null
+          }
+        }) : _this2.state.mainArray[_this2.state.selectedTable].types.push({
           type: type,
           typeId: typeId,
           name: name
         });
         _this2.forceUpdate();
-
-        // this.setState((prevState) => ({
-        //   mainArray: [
-        //       ...prevState.mainArray[prevState.selectedTable],
-        //       {
-        //         types: [
-        //           ...prevState.mainArray[prevState.selectedTable].types,
-        //           {
-        //             typeId,
-        //             type,
-        //             name,
-        //           },
-        //         ],
-        //       },
-        //   ],
-        // }));
       };
 
       return React.createElement(
@@ -151,7 +132,7 @@ var Main = function (_React$Component) {
                   React.createElement("input", {
                     className: "bg-slate-500 w-[40%] outline-none",
                     type: "text",
-                    placeholder: "Table" + IndexTable
+                    placeholder: "Table " + IndexTable /// Print zamanında tablo ismini placeholderdan çek.
                   }),
                   React.createElement(
                     "div",
@@ -165,6 +146,7 @@ var Main = function (_React$Component) {
                           } else {
                             _this2.state.mainArray[_this2.state.selectedTable].primaryKey = null;
                           }
+                          _this2.forceUpdate();
                         },
                         id: "countries",
                         className: "border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
@@ -221,20 +203,51 @@ var Main = function (_React$Component) {
                         type: "text",
                         placeholder: "name"
                       }),
-                      Type.type === "Integer" && _this2.state.mainArray[_this2.state.selectedTable].primaryKey !== Type.typeId ? React.createElement(
+                      Type.type === "Integer" && _this2.state.mainArray[IndexTable].primaryKey != Type.typeId && React.createElement("input", {
+                        type: "checkbox",
+                        onChange: function onChange(e) {
+                          e.target.checked ? _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.foreignState = true : _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.foreignState = false;
+                          _this2.forceUpdate();
+                        }
+                      }),
+                      Type.type == "Integer" && _this2.state.mainArray[IndexTable].primaryKey != Type.typeId && _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.foreignState == true && React.createElement(
                         "select",
                         {
-                          onChange: function onChange() {},
+                          onChange: function onChange(e) {
+                            e.target.value !== 'null' ? _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.targetTableId = e.target.value : _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.targetTableId = null;
+                            _this2.forceUpdate();
+                          },
+                          id: "countries",
+                          className: "border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
+                        },
+                        React.createElement("option", { value: "null", selected: "" }),
+                        _this2.state.mainArray.filter(function (table) {
+                          return table.id != IndexTable;
+                        }).map(function (foreignTables, foreignTablesIndex) {
+                          return React.createElement(
+                            "option",
+                            {
+                              key: foreignTablesIndex,
+                              value: foreignTables.id,
+                              selected: ""
+                            },
+                            foreignTables.id
+                          );
+                        })
+                      ),
+                      Type.type == "Integer" && _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.foreignState == true && _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.targetTableId !== null && React.createElement(
+                        "select",
+                        {
                           id: "countries",
                           className: "border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
                         },
                         React.createElement("option", { value: "null", selected: "" }),
                         React.createElement(
                           "option",
-                          { value: "fk" },
-                          "Foreign Key"
+                          { value: "null", selected: "" },
+                          _this2.state.mainArray[IndexTable].types[IndexType].foreignKey.targetTableId
                         )
-                      ) : "",
+                      ),
                       React.createElement(
                         "button",
                         {
