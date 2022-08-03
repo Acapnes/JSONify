@@ -2,525 +2,231 @@ class Main extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      count: [
+      selectedTable: 0,
+      setTypeId: 0,
+      mainArray: [
         {
-          index: 0,
-        },
-      ],
-      mainArray: [[]], //projedeki tüm arraylerin tutulduğu array
-      mainController: [
-        {
-          pkDisabled: true,
-          pk: "null", //tablo primary key'ini tutuyor
-          indexForeignKeys: "null", //hedeflenen tablonun main arraydaki index numarası
-          foreignIndex: [
-            // tabloların içerisindeki 'int'
+          id: 0,
+          primaryKey: null,
+          types: [],
+          foreignKeys: [
             {
-              typeId: "null", //int elemanın kendi ıd si
-              targetId: "null", // hedeflediği int elemanın ıd si
+              foreignKeyId: null,
+              hostId: null,
+              targetTableId: null,
+              targetTypeId: null,
             },
           ],
         },
       ],
-      IsActiveSelectedTableIndexNumber: 0, // seçili olan tablonun aktifliğini gösterir sarı border aynı zamanda onun index numarasını main array içerisinden alır.
-      classData: "", // class oluşturulduğunda classların tutulduğu array.
-      tableName: [], // bir tablo isim array  ör: ['batuhnan', 'serhat', 'hakim'] bu şekilde tablo isimleri tutuluyor.
-      primaryEnabled: true,
     };
   }
 
   render() {
-    const typeArray = [
+    console.log(this.state.mainArray);
+    const typesArray = [
       "Integer",
       "String",
-      "Boolean",
-      "Byte",
       "Char",
       "DateTime",
+      "Boolean",
+      "Byte",
     ];
 
+    const addNewTable = (data) => {
+      this.setState((prevState) => ({
+        mainArray: [
+          ...prevState.mainArray,
+          {
+            id: this.state.mainArray[this.state.selectedTable-1].id+1,
+            primaryKey: null,
+            types: [],
+            foreignKeys: [
+              {
+                foreignKeyId: null,
+                hostId: null,
+                targetTableId: null,
+                targetTypeId: null,
+              },
+            ],
+          },
+        ],
+      }));
+    };
+
+    const addNewType = (type, typeId, name) => {
+      this.state.mainArray[this.state.selectedTable].types.push({
+        type,
+        typeId,
+        name,
+      });
+      this.forceUpdate();
+
+      // this.setState((prevState) => ({
+      //   mainArray: [
+      //       ...prevState.mainArray[prevState.selectedTable],
+      //       {
+      //         types: [
+      //           ...prevState.mainArray[prevState.selectedTable].types,
+      //           {
+      //             typeId,
+      //             type,
+      //             name,
+      //           },
+      //         ],
+      //       },
+      //   ],
+      // }));
+    };
+
     return (
-      <div className="w-screen h-full py-10 px-8 flex justify-between overflow-y-hidden">
-        <div className="w-[30%] h-full flex flex-col space-y-16 sticky top-0">
-          <div className="w-full h-full flex flex-row sticky top-0">
-            <div className="w-full h-full bg-purple-600 flex flex-col space-y-4 items-center justify-between ">
-              {typeArray.map((type, index) => (
-                <button
-                  key={index}
-                  onClick={(e) => {
-                    console.log(this.state.mainArray)
-                    this.state.mainArray[
-                      this.state.IsActiveSelectedTableIndexNumber
-                    ].push({
-                      typeId:
-                        this.state.count[
-                          this.state.IsActiveSelectedTableIndexNumber
-                        ].index,
-                      type: type,
-                      name: "",
-                      limit: 10,
-                      AllowNull: false,
-                      primarykey: false,
-                      foreignkey: { host: "null", targetTable: "null" },
-                      regex: "",
-                    });
-                    this.setState({
-                      mainArray: [...this.state.mainArray],
-                    });
-                    this.state.count[
-                      this.state.IsActiveSelectedTableIndexNumber
-                    ].index += 1;
-                    this.forceUpdate();
-                  }}
-                  className="w-full h-[4rem] flex justify-between items-center text-xl text-white hover:bg-red-400 px-4"
-                >
-                  <p>{type}</p> <p>+</p>
-                </button>
-              ))}
-            </div>
-
-            <div className="w-[25%] h-full flex flex-col space-y-5 mx-4 relative">
+      <div className="w-full h-full flex flex-row justify-between">
+        {/* LEFT SIDE */}
+        <div className=" w-[35vw] h-[62rem] flex flex-row p-20 space-x-10">
+          <div className="flex flex-col space-y-5">
+            {typesArray.map((selectedType, IndexSelectedType) => (
               <button
-                className="w-24 h-24 bg-purple-400 items-center"
+                key={IndexSelectedType}
                 onClick={() => {
-                  this.setState({
-                    IsActiveSelectedTableIndexNumber:
-                      this.state.mainArray.length,
-                  });
-                  this.state.mainArray.push([]);
-                  this.state.mainController.push({
-                    pk: "null",
-                    indexForeignKeys: "null",
-                    pkDisabled: true,
-                    foreignIndex: [{ typeId: "null", targetId: "null" }],
-                  });
-                  this.state.tableName.push([]);
-                  this.state.count[this.state.IsActiveSelectedTableIndexNumber]
-                    ? this.state.count.push({ index: 0 })
-                    : "";
+                  addNewType(selectedType, this.state.setTypeId, "null");
                 }}
+                className="px-4 py-2 bg-yellow-200 rounded-lg"
               >
-                +
+                {selectedType}
               </button>
-              <button
-                className="w-24 h-24 bg-purple-400 items-center"
-                onClick={() => {
-                  this.setState({
-                    classData: `${this.state.mainArray.map(
-                      (table, tableIndex) =>
-                        `public static ${this.state.tableName[tableIndex]}
-                        ${this.state.mainArray[tableIndex].map(
-                          (data, textIndex) =>
-                            `
-                          ${data.type}   ${data.name}  (${data.limit}) ${
-                              data.AllowNull ? "not null" : "null"
-                            } ${
-                              data.type == "Integer" &&
-                              data.typeId ==
-                                this.state.mainController[tableIndex].pk
-                                ? "PRIMARY KEY"
-                                : ""
-                            }${
-                              data.type == "Integer" &&
-                              data.typeId ==
-                                this.state.mainController[tableIndex]
-                                  .foreignIndex[data.typeId].typeId
-                                ? `FOREIGN KEY REFERENCES  ${
-                                    this.state.mainController[tableIndex]
-                                      .foreignIndex[data.typeId].typeId
-                                  }`
-                                : ""
-                            }{get; set;}\n`
-                        )}`
-                    )}`,
-                  });
-                }}
-              >
-                Print All Tables
-              </button>
-            </div>
+            ))}
           </div>
-
-          <div className=" w-full min-h-[10rem] h-[full] bg-white whitespace-pre p-5">
-            {`${this.state.classData} `}
+          <div className="flex flex-col  space-y-5">
+            <button
+              onClick={() => {
+                addNewTable();
+                this.state.selectedTable += 1;
+                this.forceUpdate();
+              }}
+              className="bg-green-400 text-3xl p-8 rounded-lg"
+            >
+              +
+            </button>
           </div>
         </div>
-
-        {/* TABLE GENERATOR */}
-        <div className="w-[60%] h-full grid md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-1 2xl:grid-cols-1">
-          {this.state.mainArray.map((data, indexTables) => (
-            <div
-              key={indexTables}
-              className={`min-w-[46rem] min-h-[32rem] bg-white text-black flex flex-col mb-10 shadow-xl border-8 border-white ${
-                this.state.IsActiveSelectedTableIndexNumber == indexTables
-                  ? " border-yellow-300"
-                  : "border-white"
-              }`}
-            >
-              <button
-                onClick={() => {
-                  this.setState({
-                    IsActiveSelectedTableIndexNumber: indexTables,
-                  });
-                }}
-                className="w-full h-[4rem] bg-slate-700 flex flex-row justify-between items-center px-8"
+        {/* RIGHT SIDE */}
+        <div className=" w-full h-[62rem] p-16">
+          {/* TABLE GENERATE */}
+          <div className="w-full h-full grid grid-cols-2">
+            {this.state.mainArray.map((Table, IndexTable) => (
+              <div
+                key={IndexTable}
+                className={`bg-white text-black w-full h-[24rem] flex flex-col border-4 rounded-lg ${
+                  this.state.selectedTable == IndexTable
+                    ? " border-yellow-400"
+                    : "border-white"
+                }`}
               >
-                <input
-                  className="text-white text-2xl outline-none bg-slate-700"
-                  type="text"
-                  placeholder={`Table ${indexTables}`}
-                  onChange={(e) => {
-                    this.state.tableName[indexTables] = e.target.value;
+                <button
+                  onClick={() => {
+                    this.setState({
+                      selectedTable: IndexTable,
+                    });
                   }}
-                />
-                <div className="space-x-10 flex justify-center items-center">
-                  <label className="text-md text-white w-36">Primary Key</label>
-                  <select
-                    disabled={this.state.mainController[indexTables].pkDisabled} //default olarak true gelerek alanı disabled eder.
-                    onChange={(e) => {
-                      this.state.mainController[indexTables].pk =
-                        e.target.value; // seçili tablonun primaryket objesini günceller.
-                      this.forceUpdate();
-                    }}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                  >
-                    <option value="null" selected=""></option>
-                    {this.state.mainArray[indexTables].map(
-                      (types, indexTableTypes2) =>
-                        types.type == "Integer" && types.name != "" ? (
+                  className="w-full h-[3rem]  rounded-t-md flex justify-between px-6 items-center bg-slate-500"
+                >
+                  <input
+                    className="bg-slate-500 w-[40%] outline-none"
+                    type="text"
+                    placeholder={"Table" + IndexTable}
+                  />
+                  <div className="flex flex-row justify-end space-x-3  w-[60%]">
+                    <select
+                      onChange={(e) => {
+                        if (e.target.value != "null") {
+                          this.state.mainArray[
+                            this.state.selectedTable
+                          ].primaryKey = e.target.value;
+                        } else {
+                          this.state.mainArray[
+                            this.state.selectedTable
+                          ].primaryKey = null;
+                        }
+                      }}
+                      id="countries"
+                      className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
+                    >
+                      <option value="null" selected=""></option>
+                      {this.state.mainArray[IndexTable].types
+                        .filter((types) => types.type === "Integer")
+                        .map((primaryType, primaryTypeIndex) => (
                           <option
-                            key={indexTableTypes2}
-                            value={types.typeId}
+                            key={primaryTypeIndex}
+                            value={primaryType.typeId}
                             selected=""
                           >
-                            {types.name}
+                            {primaryType.type}
                           </option>
+                        ))}
+                    </select>
+                    <a>Print</a>
+                    <a
+                      onClick={() => {
+                        this.state.mainArray.splice(IndexTable, 1);
+                        this.forceUpdate();
+                      }}
+                    >
+                      Delete
+                    </a>
+                  </div>
+                </button>
+                {/* ROW GENERATE */}
+                <div className="w-full h-full">
+                  {this.state.mainArray[IndexTable].types.map(
+                    (Type, IndexType) => (
+                      <div
+                        key={IndexType}
+                        className="p-4 shadow-lg flex flex-row space-x-2"
+                      >
+                        <div>{Type.type}</div>
+                        <input
+                          className="outline-none"
+                          type="text"
+                          placeholder="name"
+                        />
+                        {/* FOREIGN KEY GENERATE */}
+                        {Type.type === "Integer" && this.state.mainArray[this.state.selectedTable].primaryKey !== Type.typeId ? (
+                          <select
+                            onChange={() => {}}
+                            id="countries"
+                            className="border mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-28 p-2.5"
+                          >
+                            <option value="null" selected=""></option>
+                            <option value="fk">Foreign Key</option>
+                          </select>
                         ) : (
                           ""
-                        )
-                    )}
-                  </select>
-                  <a
-                    onClick={() => {
-                      console.log(this.state.mainController[indexTables]);
-                      this.setState({
-                        classData: `public static ${
-                          this.state.tableName
-                        } \n${this.state.mainArray[indexTables].map(
-                          (data, textIndex) =>
-                            `            ${data.type}  ${data.name} (${
-                              data.limit
-                            }) ${data.AllowNull ? "not null" : "null"} ${
-                              data.type == "Integer" &&
-                              data.typeId ==
-                                this.state.mainController[indexTables].pk
-                                ? "PRIMARY KEY"
-                                : ""
-                            } ${
-                              data.type == "Integer" &&
-                              data.typeId ==
-                                this.state.mainController[indexTables]
-                                  .foreignIndex[data.typeId].typeId
-                                ? `FOREIGN KEY REFERENCES ${
-                                    this.state.mainController[indexTables]
-                                      .foreignIndex[data.typeId].targetId
-                                  }`
-                                : ""
-                            } {get; set;}\n`
-                        )}`,
-                      });
-                    }}
-                    className=" hover:bg-red-500 p-2 items-center rounded-xl"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fillRule="white"
-                      className="bi bi-upload"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z" />
-                      <path d="M7.646 1.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 2.707V11.5a.5.5 0 0 1-1 0V2.707L5.354 4.854a.5.5 0 1 1-.708-.708l3-3z" />
-                    </svg>
-                  </a>
-                  <a
-                    onClick={() => {
-                      this.state.mainArray.splice(indexTables, 1);
-                      this.forceUpdate();
-                    }}
-                    className=" hover:bg-red-500 p-2 items-center rounded-xl"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      fillRule="white"
-                      className="bi bi-trash"
-                      viewBox="0 0 16 16"
-                    >
-                      <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                      <path
-                        fillRule="evenodd"
-                        d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
-                      />
-                    </svg>
-                  </a>
+                        )}
+
+                        <button
+                          className=" shadow-lg px-4 py-2"
+                          onClick={() => {
+                            this.state.mainArray[IndexTable].types.splice(
+                              IndexType,
+                              1
+                            );
+                            this.forceUpdate();
+                          }}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )
+                  )}
                 </div>
-              </button>
-
-              {/* TABLE INSIDE TYPES GENERATOR */}
-              {this.state.mainArray[indexTables].map((data, indexTypes) => (
-                <div
-                  key={indexTypes}
-                  className="w-full h-[4rem] px-8 mt-2 my-10 shadow-lg flex justify-between items-center"
-                >
-                  <div className="flex flex-row">
-                    <input
-                      defaultValue={data.type}
-                      type="text"
-                      className=" outline-none  w-[10rem]"
-                    />
-                    <input
-                      // TYPE INTEGER SA COUNT > 0 && NAME != NULL PRIMARY KEY DROPOWN AKTİFLEŞTİR
-                      onChange={(e) => {
-                        if (e.target.value !== "") {
-                          this.state.mainArray[indexTables][indexTypes].name =
-                            e.target.value;
-                          this.state.mainController[indexTables].pkDisabled = false;
-                        } else {
-                          this.state.mainArray[indexTables][indexTypes].name =
-                            e.target.value;
-                          this.state.mainController[indexTables].pkDisabled = true;
-                        }
-                        this.forceUpdate();
-                      }}
-                      placeholder="name"
-                      value={this.state.mainArray[indexTables][indexTypes].name}
-                      type="text"
-                      className=" outline-none w-[10rem]"
-                    />
-                    <input
-                      onChange={(e) => {
-                        this.state.mainArray[indexTables][indexTypes].limit =
-                          e.target.value;
-                      }}
-                      placeholder={`(${data.limit})`}
-                      type="text"
-                      className=" outline-none w-[3.5rem]"
-                    />
-                    <input
-                      onChange={() => {
-                        data.AllowNull = !data.AllowNull;
-                      }}
-                      type="checkbox"
-                      className=" outline-none w-[3.5rem] text-black"
-                    />
-                    <label htmlFor="vehicle1">Null</label>
-                  </div>
-                  <div className="flex flex-row space-x-3">
-                    <div
-                      id="Menus"
-                      className="flex flex-row w-full space-x-3 min-w-[42rem]"
-                    >
-                      {data.type == "Integer" &&
-                      data.typeId !=
-                        this.state.mainController[indexTables].pk ? (
-                        <select
-                          onChange={(e) => {
-                            if (e.target.value == "fk") {
-                              this.state.mainArray[indexTables][
-                                indexTypes
-                              ].foreignkey = {
-                                host: indexTypes,
-                                targetTable: "",
-                              };
-                            } else if (e.target.value == "null") {
-                              this.state.mainArray[indexTables][
-                                indexTypes
-                              ].foreignkey = {
-                                host: "null",
-                                targetTable: "null",
-                              };
-                            }
-                            this.forceUpdate();
-                          }}
-                          id="countries"
-                          className="bg-gray-50 border border-gray-300 mx-5 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        >
-                          <option value="null" selected=""></option>
-                          <option value="fk">Foreign Key</option>
-                        </select>
-                      ) : (
-                        ""
-                      )}
-                      {data.foreignkey.host !== "null" &&
-                      data.typeId !=
-                        this.state.mainController[indexTables].pk ? (
-                        <select
-                          onChange={(event) => {
-                            this.state.mainArray[indexTables][
-                              indexTypes
-                            ].foreignkey = {
-                              host: indexTables,
-                              targetTable: event.target.value,
-                            };
-                            this.state.mainController[
-                              indexTables
-                            ].indexForeignKeys = event.target.value;
-                            this.forceUpdate();
-                          }}
-                          id="countries"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        >
-                          <option value="null" selected=""></option>
-                          {this.state.mainArray.map(
-                            (foreignTable, indexForeignKeys) =>
-                              indexForeignKeys != indexTables ? (
-                                <option
-                                  key={indexForeignKeys}
-                                  value={indexForeignKeys}
-                                  selected=""
-                                >
-                                  table {indexForeignKeys}
-                                </option>
-                              ) : (
-                                ""
-                              )
-                          )}
-                        </select>
-                      ) : (
-                        ""
-                      )}
-
-                      {data.foreignkey.targetTable !== "" &&
-                      this.state.mainController[indexTables]
-                        .indexForeignKeys !== "null" &&
-                      data.typeId !=
-                        this.state.mainController[indexTables].pk ? (
-                        <select
-                          onChange={(event) => {
-                            if (
-                              this.state.mainController[indexTables]
-                                .foreignIndex[indexTypes]
-                            ) {
-                              this.state.mainController[
-                                indexTables
-                              ].foreignIndex[indexTypes] = {
-                                typeId:
-                                  this.state.mainArray[indexTables][indexTypes]
-                                    .typeId,
-                                targetId: event.target.value,
-                              };
-                            } else {
-                              this.state.mainController[
-                                indexTables
-                              ].foreignIndex.push({
-                                typeId:
-                                  this.state.mainArray[indexTables][indexTypes]
-                                    .typeId,
-                                targetId: event.target.value,
-                              });
-                            }
-
-                            this.forceUpdate();
-                          }}
-                          id="countries"
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-                        >
-                          <option value="null" selected=""></option>
-                          {this.state.mainArray[
-                            data.foreignkey.targetTable
-                          ].map((targetTable, indexTargetTable) =>
-                            targetTable.type === "Integer" &&
-                            this.state.mainController[
-                              this.state.mainController[indexTables]
-                                .indexForeignKeys
-                            ].pk != "" &&
-                            this.state.mainController[
-                              this.state.mainController[indexTables]
-                                .indexForeignKeys
-                            ].pk != "null" ? (
-                              <option
-                                key={indexTargetTable}
-                                value={targetTable.name}
-                                selected=""
-                              >
-                                {targetTable.name}
-                              </option>
-                            ) : (
-                              ""
-                            )
-                          )}
-                        </select>
-                      ) : (
-                        ""
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        // this.state.mainArray[indexTables].splice(indexTypes,1);
-                        // this.state.count[indexTables].index -= 1;
-
-                        // this.state = {
-                        //   food: {
-                        //     sandwich: {
-                        //       capsicum: true,
-                        //       crackers: true,
-                        //       mayonnaise: true
-                        //     },
-                        //     pizza: {
-                        //       jalapeno: true,
-                        //       extraCheese: false
-                        //     }
-                        //   }
-                        // }
-
-                        // this.setState(prevState => ({
-                        //   mainArray: [ //mainArray 
-                        //     ...prevState.mainArray,           // copy all other key-value pairs of food object
-                        //     indexTables: [                     // specific object of food object
-                        //       ...prevState.food.pizza,   // copy all pizza key-value pairs
-                        //       extraCheese: true          // update value of specific key
-                        //     }
-                        //   ]
-                        // }))
-
-
-                        this.setState({
-
-                          mainArray: [...this.state.mainArray[indexTables].filter(type => type.typeId !== this.state.mainArray[indexTables][indexTypes].typeId)]
-                        })
-                        //this.state.mainArray[indexTables].splice(this.state.mainArray[indexTables][indexTypes],1)
-                        this.forceUpdate();
-                      }}
-                      className="px-2 py-2 hover:bg-yellow-500 hover:opacity-70 rounded-3xl"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        fillRule="currentColor"
-                        className="bi bi-trash"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                        <path
-                          fillRule="evenodd"
-                          d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
   }
 }
+
 const root = ReactDOM.createRoot(document.getElementById("main"));
 root.render(<Main />);
