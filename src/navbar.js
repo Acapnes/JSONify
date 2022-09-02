@@ -20,7 +20,7 @@ var Navbar = function (_React$Component) {
     value: function render() {
       return React.createElement(
         "div",
-        { className: "w-full h-[6.5rem] bg-purple-600 px-4 flex items-center relative" },
+        { className: "w-full h-[5.8rem] bg-purple-600 px-4 flex items-center relative" },
         React.createElement(
           "p",
           { className: "text-3xl text-white font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 " },
@@ -32,6 +32,3 @@ var Navbar = function (_React$Component) {
 
   return Navbar;
 }(React.Component);
-
-var root = ReactDOM.createRoot(document.getElementById('navbar'));
-root.render(React.createElement(Navbar, null));
